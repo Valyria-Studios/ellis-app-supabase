@@ -1,4 +1,5 @@
 # Ellis App
+The is version with supabase not the version with geo!
 
 Ellis is a relationship and service manager application designed for service providers to meet the needs of marginalized communities more efficiently and effectively. It enables service providers to manage client relationships, make referrals to services, track client progress, and coordinate care across organizations.
 
