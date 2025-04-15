@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
   Keyboard,
+  TextInput,
+  Alert
 } from "react-native";
 
 import globalstyles from "../../shared/globalStyles";
@@ -22,12 +24,14 @@ import { useUser } from "../../context/userContext";
 const ServiceDirectory = ({ route, navigation }) => {
   const client = route.params?.client;
   const [frequentServices, setFrequentServices] = useState([]);
-  const user = useUser();
+  const { user, organization, updateOrganization } = useUser();
   const [serviceCategories, setServiceCategories] = useState([]);
   const [nonProfits, setNonProfits] = useState([]); // Store NonProfits data
   const [loading, setLoading] = useState(true); // Track loading state
   const isFocused = useIsFocused();
   const [searchInput, setSearchInput] = useState(""); // State for search input
+  const [editableOrg, setEditableOrg] = useState(null);
+  const [isEditingOrg, setIsEditingOrg] = useState(false);
 
   const CACHE_EXPIRATION = 1000 * 60 * 60; // 1 hour
   const CACHE_KEY_SERVICES = "cache_services";
@@ -37,6 +41,18 @@ const ServiceDirectory = ({ route, navigation }) => {
     Keyboard.dismiss();
     setSearchInput(""); // Clears search input and hides search results
   };
+
+  useEffect(() => {
+    if (organization) {
+      setEditableOrg({
+        id: organization.id, // ✅ make sure this is included
+        name: organization.name || "",
+        description: organization.description || "",
+        phone_number: organization.phone_number || "",
+        address: organization.address || "",
+      });
+    }
+  }, [organization]);
 
   const fetchWithCache = async (cacheKey, url) => {
     try {
@@ -218,6 +234,104 @@ const ServiceDirectory = ({ route, navigation }) => {
           showProfileImage={false} // Hide the profile image here
         />
       </View>
+      {organization && (
+        <View style={styles.orgEditor}>
+          <View style={styles.orgHeader}>
+            <Text style={styles.sectionTitle}>Your Organization</Text>
+            <TouchableOpacity
+              onPress={() => {
+                if (isEditingOrg) {
+                  setEditableOrg({
+                    name: organization.name || "",
+                    description: organization.description || "",
+                    phone_number: organization.phone_number || "",
+                    address: organization.address || "",
+                  });
+                }
+                setIsEditingOrg(!isEditingOrg);
+              }}
+            >
+              <Text style={styles.editButtonText}>
+                {isEditingOrg ? "Cancel" : "Edit"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {isEditingOrg ? (
+            <>
+              <TextInput
+                style={styles.textInput}
+                value={editableOrg.name}
+                onChangeText={(text) =>
+                  setEditableOrg((prev) => ({ ...prev, name: text }))
+                }
+                placeholder="Organization Name"
+              />
+              <TextInput
+                style={styles.textInput}
+                value={editableOrg.description}
+                onChangeText={(text) =>
+                  setEditableOrg((prev) => ({ ...prev, description: text }))
+                }
+                placeholder="Description"
+                multiline
+              />
+              <TextInput
+                style={styles.textInput}
+                value={editableOrg.phone_number}
+                onChangeText={(text) =>
+                  setEditableOrg((prev) => ({ ...prev, phone_number: text }))
+                }
+                placeholder="Phone Number"
+              />
+              <TextInput
+                style={styles.textInput}
+                value={editableOrg.address}
+                onChangeText={(text) =>
+                  setEditableOrg((prev) => ({ ...prev, address: text }))
+                }
+                placeholder="Address"
+              />
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={async () => {
+                  console.log("Attempting to save organization:", editableOrg);
+                  try {
+                    const result = await updateOrganization(editableOrg);
+                    console.log("Update result:", result);
+                    Alert.alert("Success", "Organization updated.");
+                    setIsEditingOrg(false);
+                  } catch (err) {
+                    console.error("Update failed:", err);
+                    Alert.alert("Error", err.message || "Update failed.");
+                  }
+                }}
+              >
+                <Text style={styles.saveButtonText}>Save Changes</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Text style={styles.orgText}>
+                <Text style={styles.orgLabel}>Name:</Text> {organization.name}
+              </Text>
+              <Text style={styles.orgText}>
+                <Text style={styles.orgLabel}>Description:</Text>{" "}
+                {organization.description}
+              </Text>
+              <Text style={styles.orgText}>
+                <Text style={styles.orgLabel}>Phone:</Text>{" "}
+                {organization.phone_number}
+              </Text>
+              <Text style={styles.orgText}>
+                <Text style={styles.orgLabel}>Address:</Text>{" "}
+                {organization.address}
+              </Text>
+            </>
+          )}
+        </View>
+      )}
+
       <ScrollView style={{ zIndex: 0 }} showsVerticalScrollIndicator={false}>
         <View>
           <View>
@@ -371,6 +485,26 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     textAlign: "center",
     fontFamily: "gabarito-semibold",
+  },
+  orgHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  editButtonText: {
+    color: "#10798B",
+    fontFamily: "gabarito-bold",
+    fontSize: 16,
+  },
+  orgText: {
+    marginBottom: 6,
+    fontFamily: "gabarito-regular",
+    color: "#333",
+  },
+  orgLabel: {
+    fontFamily: "gabarito-bold",
+    color: "#094851",
   },
 });
 

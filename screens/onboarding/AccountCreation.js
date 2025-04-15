@@ -33,9 +33,7 @@ const AccountCreation = () => {
         console.error("Failed to fetch nonprofits:", error);
         return;
       }
-
-      console.log(data);
-
+      
       const formatted = data.map((np) => ({
         label: np.name,
         value: np.id, // Or use `np.id` if storing ID instead

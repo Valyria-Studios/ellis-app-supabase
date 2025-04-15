@@ -10,6 +10,7 @@ export const UserProvider = ({ children }) => {
   const [loginTimestamp, setLoginTimestamp] = useState(null);
   const SESSION_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
   const [profile, setProfile] = useState(null);
+  const [organization, setOrganization] = useState(null);
 
   // Function to log out the user
   const logoutUser = async () => {
@@ -36,6 +37,20 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  const fetchOrganization = async (orgId) => {
+    const { data, error } = await authSupabase
+      .from("nonprofits")
+      .select("*")
+      .eq("id", orgId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching organization:", error);
+    } else {
+      setOrganization(data);
+    }
+  };
+
   // Function to fetch user profile from Supabase
   const fetchUserProfile = async (userId) => {
     if (!userId) return;
@@ -48,8 +63,29 @@ export const UserProvider = ({ children }) => {
 
     if (!profileError) {
       setProfile(userProfile);
+
+      if (userProfile.organization) {
+        fetchOrganization(userProfile.organization);
+      }
     } else {
       console.error("Error fetching profile:", profileError);
+    }
+  };
+
+  const updateOrganization = async (updates) => {
+    if (!organization?.id) return;
+
+    const { data, error } = await authSupabase
+      .from("nonprofits")
+      .update(updates)
+      .eq("id", organization.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating organization:", error);
+    } else {
+      setOrganization(data);
     }
   };
 
@@ -89,7 +125,15 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, profile, fetchUserProfile }}>
+    <UserContext.Provider
+      value={{
+        user,
+        profile,
+        organization, // full org object
+        fetchUserProfile,
+        updateOrganization, // helper to update org
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
