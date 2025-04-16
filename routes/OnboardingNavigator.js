@@ -6,6 +6,7 @@ import Register from "../screens/onboarding/RegisterPage";
 import CreateOrganization from "../screens/onboarding/CreateOrganization";
 import ServiceHours from "../screens/onboarding/addServiceHours";
 import ServicesPage from "../screens/onboarding/addServicesPage";
+import CustomBackButton from "../shared/CustomBackButton";
 
 const Stack = createStackNavigator();
 
@@ -20,12 +21,28 @@ const OnBoardingNavigator = ({ onCompleteOnboarding }) => {
       <Stack.Screen
         name="Login"
         component={Login}
-        options={{ headerShown: false }}
+        options={{
+          headerTitle: "",
+          headerLeft: () => <CustomBackButton color="#094852" />,
+          headerStyle: {
+            backgroundColor: "#F3F8F9",
+            shadowColor: "transparent",
+            elevation: 0,
+          },
+        }}
       />
       <Stack.Screen
         name="Register"
         component={Register}
-        options={{ headerShown: false }}
+        options={{
+          headerTitle: "",
+          headerLeft: () => <CustomBackButton color="#094852" />,
+          headerStyle: {
+            backgroundColor: "#F3F8F9",
+            shadowColor: "transparent",
+            elevation: 0,
+          },
+        }}
       />
       <Stack.Screen
         name="CreateOrganization"

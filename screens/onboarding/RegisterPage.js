@@ -9,14 +9,11 @@ import {
   Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import OTPInputView from "@twotalltotems/react-native-otp-input"; // ✅ Import OTP input
 import globalstyles from "../../shared/globalStyles";
 import { authSupabase } from "../../api/supabaseClient"; // Import Supabase client
 
 const Register = ({ navigation }) => {
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [agreedError, setAgreedError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,12 +36,6 @@ const Register = ({ navigation }) => {
     setLoading(true);
 
     let valid = true;
-    if (!name) {
-      setNameError("Name is required");
-      valid = false;
-    } else {
-      setNameError("");
-    }
 
     if (!email) {
       setEmailError("Email is required");
@@ -112,7 +103,7 @@ const Register = ({ navigation }) => {
     }
   };
 
-  const isRegisterDisabled = !name || !email || !agreed || loading;
+  const isRegisterDisabled = !email || !agreed || loading;
   const isOtpDisabled = !otp;
 
   return (
@@ -125,13 +116,6 @@ const Register = ({ navigation }) => {
         <Text style={globalstyles.subHeader}>
           Create an account on Ellis to get started
         </Text>
-        <TextInput
-          placeholder="Name"
-          style={globalstyles.textInput}
-          value={name}
-          onChangeText={setName}
-        />
-        {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
         <TextInput
           placeholder="Email Address"
           style={globalstyles.textInput}
