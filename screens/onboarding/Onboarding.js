@@ -38,9 +38,9 @@ const Onboarding = ({ navigation }) => {
             </View>
           </TouchableOpacity>
           <View style={styles.dividerContainer}>
-            <View style={styles.divderLines} />
+            <View style={styles.dividerLines} />
             <Text style={styles.dividerText}>or</Text>
-            <View style={styles.divderLines} />
+            <View style={styles.dividerLines} />
           </View>
           <TouchableOpacity
             style={[globalstyles.buttonContainer]}
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
 
-  divderLines: {
+  dividerLines: {
     flex: 1,
     height: 1,
     backgroundColor: "#909899",

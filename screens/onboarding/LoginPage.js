@@ -109,12 +109,11 @@ const Login = () => {
   const isOtpDisabled = !otp || loading;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={globalstyles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
       >
-        {/* Logo Placeholder - Replace with your app logo */}
         <View style={styles.logoContainer}>
           <Image
             source={require("../../assets/ellis-test-icon.png")}
@@ -231,10 +230,10 @@ const Login = () => {
             </View>
           )}
 
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
+          <View style={styles.dividerContainer}>
+            <View style={styles.dividerLines} />
             <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
+            <View style={styles.dividerLines} />
           </View>
 
           <TouchableOpacity
@@ -253,10 +252,6 @@ const Login = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F3F8F9",
-  },
   keyboardAvoidingView: {
     flex: 1,
     paddingHorizontal: 20,
@@ -353,23 +348,30 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 14,
   },
-  divider: {
+  dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 20,
+    justifyContent: "center",
+    marginHorizontal: 15,
+    marginVertical: 10,
   },
-  dividerLine: {
+
+  dividerLines: {
     flex: 1,
     height: 1,
-    backgroundColor: "#DDE5E7",
+    backgroundColor: "#909899",
   },
+
   dividerText: {
     paddingHorizontal: 10,
-    color: "#888",
-    fontSize: 14,
+    fontSize: 12,
+    color: "#909899",
+    fontFamily: "gabarito-regular",
+    fontWeight: 400,
+    letterSpacing: 2.4,
+    textTransform: "uppercase",
   },
   registerLink: {
-    marginTop: 10,
     alignItems: "center",
     paddingVertical: 10,
   },

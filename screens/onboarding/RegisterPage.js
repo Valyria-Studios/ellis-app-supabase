@@ -6,24 +6,31 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Modal,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Image,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { authSupabase } from "../../api/supabaseClient";
 import globalstyles from "../../shared/globalStyles";
-import { authSupabase } from "../../api/supabaseClient"; // Import Supabase client
 
 const Register = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [agreedError, setAgreedError] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [agreed, setAgreed] = useState(false);
   const [otp, setOtp] = useState("");
   const [waitingForOtp, setWaitingForOtp] = useState(false);
+  const [focusedInput, setFocusedInput] = useState(null);
 
   const toggleAgree = () => {
     setAgreed(!agreed);
+    if (agreed === false) {
+      setAgreedError("");
+    }
   };
 
   const isValidEmail = (email) => {
@@ -48,7 +55,7 @@ const Register = ({ navigation }) => {
     }
 
     if (!agreed) {
-      setAgreedError("Must accept Terms of Use");
+      setAgreedError("You must accept our Terms of Use");
       valid = false;
     } else {
       setAgreedError("");
@@ -80,8 +87,13 @@ const Register = ({ navigation }) => {
   };
 
   // Function to verify OTP
-  // Function to verify OTP
   const handleVerifyOtp = async (code) => {
+    if (!code) {
+      Alert.alert("Missing OTP", "Please enter the verification code");
+      return;
+    }
+
+    setLoading(true);
     try {
       const { data, error } = await authSupabase.auth.verifyOtp({
         email,
@@ -91,200 +103,374 @@ const Register = ({ navigation }) => {
 
       if (error) {
         Alert.alert("Verification Error", error.message);
+        setLoading(false);
         return;
       }
 
       Alert.alert("Success", "You are registered!");
-      setWaitingForOtp(false); // Close modal
+      setWaitingForOtp(false);
       setOtp("");
+      setLoading(false);
+      navigation.navigate("Service Directory");
     } catch (error) {
       console.error("OTP Verification Error:", error);
       Alert.alert("Error", "Something went wrong. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const resendOtp = async () => {
+    setLoading(true);
+    const { error } = await authSupabase.auth.signInWithOtp({ email });
+    setLoading(false);
+
+    if (error) {
+      Alert.alert("Error", error.message);
+    } else {
+      Alert.alert(
+        "Success",
+        "A new verification code has been sent to your email"
+      );
     }
   };
 
   const isRegisterDisabled = !email || !agreed || loading;
-  const isOtpDisabled = !otp;
+  const isOtpDisabled = !otp || loading;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={{ margin: 40 }}></View>
-      <View style={globalstyles.headerContainer}>
-        <Text style={globalstyles.header}>Create an account</Text>
-      </View>
-      <View style={{ marginBottom: 10 }}>
-        <Text style={globalstyles.subHeader}>
-          Create an account on Ellis to get started
-        </Text>
-        <TextInput
-          placeholder="Email Address"
-          style={globalstyles.textInput}
-          value={email}
-          onChangeText={setEmail}
-        />
-        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-      </View>
-      <View style={styles.agreeContainer}>
-        <TouchableOpacity
-          style={[styles.agreeCircle, agreed && styles.checkedAgreeCircle]}
-          onPress={toggleAgree}
-          activeOpacity={0.8}
-        />
-        <Text style={styles.agreeText}>
-          I agree to Ellis' privacy policy and terms of use
-        </Text>
-      </View>
-      {agreedError ? <Text style={styles.errorText}>{agreedError}</Text> : null}
-      <TouchableOpacity
-        style={[
-          globalstyles.buttonContainer,
-          isRegisterDisabled
-            ? styles.disabledButton
-            : { backgroundColor: "#10798B" },
-          { marginVertical: 10 },
-        ]}
-        activeOpacity={0.6}
-        onPress={handleSubmit}
-        disabled={isRegisterDisabled}
+    <SafeAreaView style={globalstyles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardAvoidingView}
       >
-        <Text
-          style={[
-            globalstyles.buttonText,
-            { color: isRegisterDisabled ? "#888" : "#fff" },
-          ]}
-        >
-          {loading ? "Signing up..." : "Sign Up"}
-        </Text>
-      </TouchableOpacity>
-      <View>
-        {waitingForOtp && (
-          <>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("../../assets/ellis-test-icon.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
+
+        <View style={styles.headerContainer}>
+          <Text style={globalstyles.header}>Create an account</Text>
+          <Text style={[globalstyles.subHeader, styles.enhancedSubheader]}>
+            Join Ellis to access all services
+          </Text>
+        </View>
+
+        <View style={styles.formContainer}>
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputLabel}>Email Address</Text>
             <TextInput
-              placeholder="Enter OTP"
-              style={[globalstyles.textInput, { marginTop: 10 }]}
-              keyboardType="number-pad"
-              value={otp}
-              onChangeText={setOtp}
+              placeholder="Enter your email"
+              style={[
+                globalstyles.textInput,
+                styles.enhancedInput,
+                focusedInput === "email" && styles.focusedInput,
+              ]}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              onFocus={() => setFocusedInput("email")}
+              onBlur={() => setFocusedInput(null)}
             />
+            {emailError ? (
+              <Text style={styles.errorText}>{emailError}</Text>
+            ) : null}
+          </View>
+
+          <View style={styles.agreeContainer}>
+            <TouchableOpacity
+              style={[styles.agreeCircle, agreed && styles.checkedAgreeCircle]}
+              onPress={toggleAgree}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            />
+            <TouchableOpacity onPress={toggleAgree} activeOpacity={0.8}>
+              <Text style={styles.agreeText}>
+                I agree to Ellis' privacy policy and terms of use
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {agreedError ? (
+            <Text style={styles.errorText}>{agreedError}</Text>
+          ) : null}
+
+          {!waitingForOtp ? (
             <TouchableOpacity
               style={[
                 globalstyles.buttonContainer,
-                isOtpDisabled
+                styles.enhancedButton,
+                isRegisterDisabled
                   ? styles.disabledButton
-                  : { backgroundColor: "#fff" },
-                { marginVertical: 10 },
+                  : { backgroundColor: "#10798B" },
               ]}
-              onPress={() => handleVerifyOtp(otp)}
-              activeOpacity={0.6}
-              disabled={isOtpDisabled}
+              activeOpacity={0.7}
+              onPress={handleSubmit}
+              disabled={isRegisterDisabled}
             >
-              <Text
-                style={[
-                  globalstyles.buttonText,
-                  { color: isOtpDisabled ? "#888" : "#094852" },
-                ]}
-              >
-                Verify OTP
-              </Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Text
+                  style={[
+                    globalstyles.buttonText,
+                    { color: isRegisterDisabled ? "#888" : "#fff" },
+                  ]}
+                >
+                  Create Account
+                </Text>
+              )}
             </TouchableOpacity>
-          </>
-        )}
-        {/* <TouchableOpacity
-          style={globalstyles.buttonContainer}
-          activeOpacity={0.6}
-        >
-          <Text style={globalstyles.buttonText}>Use Passkey</Text>
-        </TouchableOpacity> */}
-      </View>
+          ) : (
+            <View style={styles.otpSection}>
+              <View style={styles.otpHeader}>
+                <Text style={styles.otpTitle}>Verify Your Email</Text>
+                <Text style={styles.otpSubtitle}>
+                  We've sent a verification code to {email}
+                </Text>
+              </View>
+
+              <View style={styles.inputWrapper}>
+                <Text style={styles.inputLabel}>Verification Code</Text>
+                <TextInput
+                  placeholder="Enter the 6-digit code"
+                  style={[
+                    globalstyles.textInput,
+                    styles.enhancedInput,
+                    focusedInput === "otp" && styles.focusedInput,
+                  ]}
+                  keyboardType="number-pad"
+                  value={otp}
+                  onChangeText={setOtp}
+                  maxLength={6}
+                  onFocus={() => setFocusedInput("otp")}
+                  onBlur={() => setFocusedInput(null)}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  globalstyles.buttonContainer,
+                  styles.enhancedButton,
+                  isOtpDisabled
+                    ? styles.disabledButton
+                    : { backgroundColor: "#10798B" },
+                ]}
+                onPress={() => handleVerifyOtp(otp)}
+                activeOpacity={0.7}
+                disabled={isOtpDisabled}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text
+                    style={[
+                      globalstyles.buttonText,
+                      { color: isOtpDisabled ? "#888" : "#fff" },
+                    ]}
+                  >
+                    Verify Email
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.resendContainer}>
+                <Text style={styles.resendText}>Didn't receive the code? </Text>
+                <TouchableOpacity onPress={resendOtp} disabled={loading}>
+                  <Text style={styles.resendLink}>Resend</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.dividerContainer}>
+            <View style={styles.dividerLines} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLines} />
+          </View>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Login")}
+            style={styles.loginLink}
+          >
+            <Text style={styles.loginText}>
+              Already have an account?{" "}
+              <Text style={styles.loginHighlight}>Log in</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  keyboardAvoidingView: {
     flex: 1,
-    backgroundColor: "#F3F8F9",
+  },
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  logoContainer: {
+    alignItems: "center",
+    marginTop: 30,
+    marginBottom: 20,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    borderRadius: 25,
+  },
+  headerContainer: {
+    marginBottom: 20,
+  },
+  enhancedSubheader: {
+    marginTop: 8,
+    color: "#555",
+  },
+  formContainer: {
+    marginTop: 5,
+  },
+  inputWrapper: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#555",
+    marginBottom: 8,
+    paddingLeft: 4,
+  },
+  enhancedInput: {
+    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#DDE5E7",
+    fontSize: 16,
+  },
+  focusedInput: {
+    borderColor: "#10798B",
+    borderWidth: 1.5,
+    shadowColor: "#10798B",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  enhancedButton: {
+    borderRadius: 8,
+    paddingVertical: 16,
+    marginVertical: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   agreeContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: 10,
-    marginVertical: 10,
+    marginBottom: 16,
+    paddingHorizontal: 4,
   },
   agreeCircle: {
     borderColor: "#10798B",
-    width: 18,
-    height: 18,
-    borderWidth: 1,
-    borderRadius: 50,
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderRadius: 10,
+    marginRight: 12,
   },
-
   checkedAgreeCircle: {
     borderColor: "#10798B",
-    width: 18,
-    height: 18,
-    borderWidth: 1,
-    borderRadius: 50,
     backgroundColor: "#10798B",
   },
-
   agreeText: {
-    color: "#030E07",
-    fontFamily: "karla-regular",
-    fontSize: 16,
-    letterSpacing: -0.16,
-    paddingLeft: 10,
-  },
-
-  disabledButton: {
-    backgroundColor: "#ccc",
-    borderColor: "#ccc",
-  },
-
-  errorText: {
-    color: "red",
-    paddingHorizontal: 15,
-  },
-  modalContainer: {
+    color: "#333",
+    fontSize: 15,
     flex: 1,
+  },
+  disabledButton: {
+    backgroundColor: "#D9E2E5",
+    borderColor: "#D9E2E5",
+  },
+  errorText: {
+    color: "#E63946",
+    fontSize: 13,
+    marginTop: 4,
+    paddingLeft: 4,
+  },
+  otpSection: {
+    marginTop: 5,
+  },
+  otpHeader: {
+    marginBottom: 20,
+  },
+  otpTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 5,
+  },
+  otpSubtitle: {
+    fontSize: 14,
+    color: "#666",
+  },
+  resendContainer: {
+    flexDirection: "row",
     justifyContent: "center",
+    marginTop: 15,
+    marginBottom: 10,
+  },
+  resendText: {
+    color: "#666",
+    fontSize: 14,
+  },
+  resendLink: {
+    color: "#10798B",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  dividerContainer: {
+    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    marginHorizontal: 15,
+    marginVertical: 10,
   },
-  modalContent: {
-    width: "90%",
-    backgroundColor: "white",
-    padding: 20,
-    borderRadius: 10,
+
+  dividerLines: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#909899",
+  },
+
+  dividerText: {
+    paddingHorizontal: 10,
+    fontSize: 12,
+    color: "#909899",
+    fontFamily: "gabarito-regular",
+    fontWeight: 400,
+    letterSpacing: 2.4,
+    textTransform: "uppercase",
+  },
+  loginLink: {
     alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
-  otpInput: {
-    width: 40,
-    height: 45,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
-    color: "#000",
-  },
-  otpInputActive: {
-    borderColor: "#10798B",
-  },
-  closeButton: {
-    marginTop: 20,
-    backgroundColor: "#10798B",
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
   },
-  closeButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+  loginText: {
+    color: "#666",
+    fontSize: 15,
+  },
+  loginHighlight: {
+    color: "#10798B",
+    fontWeight: "600",
   },
 });
 
