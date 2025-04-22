@@ -10,7 +10,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   TextInput,
-  Alert
+  Alert,
 } from "react-native";
 
 import globalstyles from "../../shared/globalStyles";
@@ -20,6 +20,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused } from "@react-navigation/native";
 import SearchComponent from "../../shared/SearchHeader";
 import { useUser } from "../../context/userContext";
+import { authSupabase } from "../../api/supabaseClient";
+import NonprofitsByTag from "./NonprofitTags";
 
 const ServiceDirectory = ({ route, navigation }) => {
   const client = route.params?.client;
@@ -131,24 +133,28 @@ const ServiceDirectory = ({ route, navigation }) => {
     }
   }, [isFocused]);
 
+  // Inside your ServiceDirectory component
   useEffect(() => {
     const loadServiceAndNonProfitsData = async () => {
       try {
         setLoading(true);
 
-        // Fetch services
+        // Fetch services (you can keep this or replace similarly if also stored in Supabase)
         const servicesData = await fetchWithCache(
           CACHE_KEY_SERVICES,
           "https://ellis-test-data.com:8000/Services"
         );
 
-        // Fetch NonProfits
-        const nonProfitsData = await fetchWithCache(
-          CACHE_KEY_NONPROFITS,
-          "https://ellis-test-data.com:8000/NonProfits"
-        );
+        // 👇 Replace the NonProfits fetch with Supabase directly
+        const { data: nonProfitsData, error } = await authSupabase
+          .from("nonprofits")
+          .select("*");
 
-        // Transform services data to match the required structure
+        if (error) {
+          throw error;
+        }
+
+        // Transform services data (keep existing logic)
         const transformedCategories = servicesData.map((service) => ({
           id: service.id,
           name: service.name,
@@ -160,24 +166,24 @@ const ServiceDirectory = ({ route, navigation }) => {
           })),
         }));
 
-        // Filter categories based on available nonprofits
+        // Filter categories based on nonprofits from Supabase
         const filteredCategories = transformedCategories.filter((category) => {
           const hasNonProfits = category.Subservices.some((subservice) =>
             nonProfitsData.some((nonProfit) =>
-              nonProfit.providedServiceswithId.some(
+              nonProfit.services?.some(
                 (service) => service.id === subservice.valueId
               )
             )
           );
-          return hasNonProfits; // Only include categories with associated nonprofits
+          return hasNonProfits;
         });
 
         setServiceCategories(filteredCategories);
-        setNonProfits(nonProfitsData); // Store NonProfits data
+        setNonProfits(nonProfitsData);
       } catch (error) {
-        console.error("Failed to load service categories or NonProfits", error);
+        console.error("Failed to load data:", error);
       } finally {
-        setLoading(false); // End loading
+        setLoading(false);
       }
     };
 
@@ -186,7 +192,7 @@ const ServiceDirectory = ({ route, navigation }) => {
 
   const handleServicePress = (category) => {
     const filteredNonProfits = nonProfits.filter((nonProfit) =>
-      nonProfit.providedServiceswithId.some((service) =>
+      nonProfit.services?.some((service) =>
         category.Subservices.some(
           (subservice) => subservice.valueId === service.id
         )

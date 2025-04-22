@@ -117,7 +117,7 @@ const ServiceDetails = ({ route, navigation }) => {
       {category.Subservices &&
         category.Subservices.filter((subservice) =>
           filteredNonProfits.some((nonProfit) =>
-            nonProfit.providedServiceswithId.some(
+            nonProfit.services?.some(
               (service) => service.id === subservice.valueId
             )
           )

@@ -25,16 +25,16 @@ const EnrollmentForm = ({ route, navigation }) => {
   const [consent, setConsent] = useState();
 
   return (
-    <SafeAreaView style={[globalstyles.container]}>
-      <KeyboardAwareScrollView
-        style={{ flex: 1 }}
-        resetScrollToCoords={{ x: 0, y: 0 }}
-        contentContainerStyle={{ flexGrow: 1 }}
-        scrollEnabled={true}
-        keyboardShouldPersistTaps="handled" // Ensures taps work even when the keyboard is open
-        enableOnAndroid={true} // Enables behavior on Android
-        extraHeight={150} // Adjust this value for space between the input and keyboard
-      >
+    <KeyboardAwareScrollView
+      style={{ flex: 1, backgroundColor: "#F3F8F9" }}
+      resetScrollToCoords={{ x: 0, y: 0 }}
+      contentContainerStyle={{ flexGrow: 1 }}
+      scrollEnabled={true}
+      keyboardShouldPersistTaps="handled" // Ensures taps work even when the keyboard is open
+      enableOnAndroid={true} // Enables behavior on Android
+      extraHeight={150} // Adjust this value for space between the input and keyboard
+    >
+      <SafeAreaView style={[globalstyles.container]}>
         <View>
           <View>
             <Text style={styles.captionText}>
@@ -292,8 +292,8 @@ const EnrollmentForm = ({ route, navigation }) => {
             <Text style={styles.skipText}>Skip</Text>
           </SafeAreaView>
         </View>
-      </KeyboardAwareScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </KeyboardAwareScrollView>
   );
 };
 

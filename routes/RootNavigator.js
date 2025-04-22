@@ -344,7 +344,6 @@ const RootNavigator = () => {
               component={EnrollmentForm}
               options={({ route }) => ({
                 headerTitle: `${route.params.option} Enrollment Form`,
-
                 headerTintColor: "#094852",
                 headerTitleAlign: "left",
                 headerLeft: () => <CustomBackButton color="#094852" />,
