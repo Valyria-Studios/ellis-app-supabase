@@ -10,6 +10,7 @@ import {
 import globalstyles from "../../shared/globalStyles";
 import Card from "../../shared/Card";
 import { MaterialIcons, Octicons, Feather } from "@expo/vector-icons";
+import { authSupabase } from "../../api/supabaseClient";
 
 const SelectReferralLocation = ({ route, navigation }) => {
   const { option, categoryName, client, providedServicesId } = route.params;
@@ -18,21 +19,27 @@ const SelectReferralLocation = ({ route, navigation }) => {
   const [expandedCard, setExpandedCard] = useState(null);
 
   useEffect(() => {
-    fetch("https://ellis-test-data.com:8000/NonProfits")
-      .then((response) => response.json())
-      .then((data) => {
-        const filteredServices = data.filter((nonProfit) =>
-          nonProfit.providedServiceswithId.some((service) =>
-            providedServicesId.includes(service.id)
-          )
-        );
-        setServices(filteredServices);
+    const fetchFromSupabase = async () => {
+      setLoading(true);
+      const { data, error } = await authSupabase.from("nonprofits").select("*");
+
+      if (error) {
+        console.error("Supabase fetch error:", error);
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching services:", error);
-        setLoading(false);
-      });
+        return;
+      }
+
+      const filtered = data.filter((nonProfit) =>
+        nonProfit.services?.some((service) =>
+          providedServicesId.includes(service.id)
+        )
+      );
+
+      setServices(filtered);
+      setLoading(false);
+    };
+
+    fetchFromSupabase();
   }, [providedServicesId]);
 
   const handleOptionSelect = (service) => {

@@ -10,6 +10,7 @@ import {
 import globalstyles from "../../shared/globalStyles";
 import Card from "../../shared/Card";
 import { MaterialIcons, Octicons, Feather } from "@expo/vector-icons";
+import { authSupabase } from "../../api/supabaseClient";
 
 const NonprofitsByTag = ({ route, navigation }) => {
   const { selectedTag } = route.params;
@@ -18,23 +19,29 @@ const NonprofitsByTag = ({ route, navigation }) => {
   const [expandedCard, setExpandedCard] = useState(null);
 
   useEffect(() => {
-    fetch("https://ellis-test-data.com:8000/NonProfits")
-      .then((response) => response.json())
-      .then((data) => {
-        const filteredServices = data.filter((nonProfit) =>
-          Array.isArray(nonProfit.attributes?.Tags)
-            ? nonProfit.attributes.Tags.map((tag) => tag.trim()).includes(
-                selectedTag
-              )
-            : nonProfit.attributes?.Tags?.trim() === selectedTag
-        );
-        setServices(filteredServices);
+    const fetchServicesFromSupabase = async () => {
+      setLoading(true);
+      const { data, error } = await authSupabase.from("nonprofits").select("*");
+
+      if (error) {
+        console.error("Error fetching services from Supabase:", error);
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching services:", error);
-        setLoading(false);
-      });
+        return;
+      }
+
+      const filteredServices = data.filter((nonProfit) =>
+        Array.isArray(nonProfit.attributes?.Tags)
+          ? nonProfit.attributes.Tags.map((tag) => tag.trim()).includes(
+              selectedTag
+            )
+          : nonProfit.attributes?.Tags?.trim() === selectedTag
+      );
+
+      setServices(filteredServices);
+      setLoading(false);
+    };
+
+    fetchServicesFromSupabase();
   }, [selectedTag]);
 
   if (loading) {

@@ -14,6 +14,7 @@ import globalstyles from "../shared/globalStyles";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { dataSupabase } from "../api/supabaseClient";
+import { authSupabase } from "../api/supabaseClient";
 
 const SearchComponent = ({
   searchInput,
@@ -45,10 +46,12 @@ const SearchComponent = ({
     const loadServiceAndNonProfitsData = async () => {
       try {
         setLoading(true);
-        const nonProfitsData = await fetchWithCache(
-          CACHE_KEY_NONPROFITS,
-          "https://ellis-test-data.com:8000/NonProfits"
-        );
+        const { data: nonProfitsData, error } = await authSupabase
+          .from("nonprofits")
+          .select("*");
+
+        if (error) throw error;
+
         setOrganizations(nonProfitsData);
         setFilteredOrganizations(nonProfitsData);
       } catch (error) {

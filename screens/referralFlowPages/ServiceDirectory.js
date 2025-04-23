@@ -21,7 +21,6 @@ import { useIsFocused } from "@react-navigation/native";
 import SearchComponent from "../../shared/SearchHeader";
 import { useUser } from "../../context/userContext";
 import { authSupabase } from "../../api/supabaseClient";
-import NonprofitsByTag from "./NonprofitTags";
 
 const ServiceDirectory = ({ route, navigation }) => {
   const client = route.params?.client;

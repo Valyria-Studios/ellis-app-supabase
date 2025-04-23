@@ -240,23 +240,17 @@ function AmenityPage({ route, navigation }) {
               </View>
 
               <View style={{ marginBottom: 15 }}>
-                {amenity?.attributes?.["Provided services"]?.map(
-                  (serviceName, index) => {
-                    // Find the matching service in providedServiceswithId by name
-                    const service = amenity.providedServiceswithId.find(
-                      (item) => item.name === serviceName
-                    );
-
-                    return (
+                {Array.isArray(amenity.services)
+                  ? amenity.services.map((service, index) => (
                       <TouchableOpacity
                         key={index}
                         style={styles.serviceCard}
                         onPress={() => {
                           navigation.push("Referral Location", {
-                            option: serviceName, // Display name from "Provided services"
-                            categoryName: amenity.attributes?.["Name"], // Name of the main category/amenity
-                            providedServicesId: service ? [service.id] : [], // Use the id if found, otherwise empty array
-                            client: route.params?.client || null, // Pass client data if applicable
+                            option: service.name,
+                            categoryName: amenity.attributes?.["Name"],
+                            providedServicesId: [service.id],
+                            client: route.params?.client || null,
                           });
                         }}
                       >
@@ -269,12 +263,11 @@ function AmenityPage({ route, navigation }) {
                           Service
                         </Text>
                         <Text style={styles.serviceCardHeader}>
-                          {serviceName}
+                          {service.name}
                         </Text>
                       </TouchableOpacity>
-                    );
-                  }
-                )}
+                    ))
+                  : null}
               </View>
             </View>
           </View>
