@@ -14,7 +14,7 @@ import globalstyles from "../../shared/globalStyles";
 import Card from "../../shared/Card";
 import imageMap from "../../shared/getProfileImage";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { dataSupabase } from "../../api/supabaseClient";
+import { dataSupabase, authSupabase } from "../../api/supabaseClient";
 
 const ConfirmReferral = ({ route, navigation }) => {
   const {
@@ -34,8 +34,6 @@ const ConfirmReferral = ({ route, navigation }) => {
     certification,
     notes,
   } = route.params;
-
-  console.log(selectedService.name);
 
   const handleConfirmReferral = async () => {
     const dateStarted = new Date().toISOString();
@@ -142,6 +140,51 @@ const ConfirmReferral = ({ route, navigation }) => {
         ],
         { onConflict: ["id"] } // ✅ Ensures existing rows are updated
       );
+
+      // Clean undefined fields
+      function cleanObject(obj) {
+        return JSON.parse(
+          JSON.stringify(obj, (key, value) =>
+            value === undefined ? null : value
+          )
+        );
+      }
+
+      // After you create referralData
+      const cleanedReferralData = cleanObject(referralData);
+
+      // Fetch nonprofit referrals
+      const { data: nonprofitData, error: fetchNonprofitError } =
+        await authSupabase
+          .from("nonprofits")
+          .select("referrals")
+          .eq("id", selectedService.id)
+          .single();
+
+      if (fetchNonprofitError) {
+        console.error(
+          "Error fetching nonprofit referrals:",
+          fetchNonprofitError
+        );
+      } else {
+        const updatedReferrals = nonprofitData?.referrals
+          ? [...nonprofitData.referrals, cleanedReferralData]
+          : [cleanedReferralData];
+
+        const { error: updateNonprofitError } = await authSupabase
+          .from("nonprofits")
+          .update({ referrals: updatedReferrals })
+          .eq("id", selectedService.id);
+
+        if (updateNonprofitError) {
+          console.error(
+            "Error updating nonprofit referrals:",
+            updateNonprofitError
+          );
+        } else {
+          console.log("✅ Nonprofit referrals successfully updated!");
+        }
+      }
 
       if (error) {
         console.error("Error inserting referral data into Supabase:", error);
