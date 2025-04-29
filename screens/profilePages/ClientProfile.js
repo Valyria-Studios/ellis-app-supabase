@@ -61,7 +61,7 @@ const jobPlacementStatusItems = [
 
 const totalItems = dropdownItems.length * checklistItems.length; // Total number of ChecklistItems
 
-function ProfilePage({ route, navigation }) {
+function ClientProfile({ route, navigation }) {
   const { client } = route.params;
   const [selectedItem, setSelectedItem] = useState("Activity");
   const [checkedItems, setCheckedItems] = useState(0);
@@ -1009,4 +1009,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProfilePage;
+export default ClientProfile;

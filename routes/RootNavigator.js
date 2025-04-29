@@ -2,7 +2,7 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import ChatPage from "../screens/chatPages/ChatPage";
 import AmenityPage from "../screens/amenityPages/AmenityPage";
-import ProfilePage from "../screens/profilePages/ProfilePage";
+import ClientProfile from "../screens/profilePages/ClientProfile";
 import ServiceDirectory from "../screens/referralFlowPages/ServiceDirectory";
 import OrgProfile from "../screens/settingsPage/OrganizationProfile";
 import AccountPage from "../screens/settingsPage/AccountPage";
@@ -45,6 +45,7 @@ import GoogleSheetScreen from "../screens/sheetTest/googleSheetScreen";
 import OnBoardingNavigator from "./OnboardingNavigator";
 import { useUser } from "../context/userContext";
 import AccountCreation from "../screens/onboarding/AccountCreation";
+import UserProfile from "../screens/profilePages/UserProfile";
 
 const RootStack = createStackNavigator();
 
@@ -159,10 +160,27 @@ const RootNavigator = () => {
                 headerTransparent: true,
               })}
             />
+            <RootStack.Screen
+              name="User Profile"
+              component={UserProfile}
+              options={({ navigation, route }) => ({
+                headerLeft: () => <CustomBackButton color="#094852" />,
+                headerTitleAlign: "left",
+                headerTitleStyle: {
+                  fontFamily: "gabarito-semibold",
+                  fontSize: 24,
+                  color: "#094852",
+                },
+                headerStyle: {
+                  shadowColor: "transparent",
+                  elevation: 0,
+                },
+              })}
+            />
 
             <RootStack.Screen
-              name="Profile Page"
-              component={ProfilePage}
+              name="Client Profile"
+              component={ClientProfile}
               options={({ route, navigation }) => ({
                 headerTitle: route.params?.client?.fullName || "Profile",
                 headerTitleAlign: "left",

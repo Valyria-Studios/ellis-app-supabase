@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { dataSupabase } from "../api/supabaseClient";
 import { authSupabase } from "../api/supabaseClient";
+import { useUser } from "../context/userContext";
 
 const SearchComponent = ({
   searchInput,
@@ -29,6 +30,7 @@ const SearchComponent = ({
   const [filteredSubservices, setFilteredSubservices] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { profile, organization, updateOrganization } = useUser();
 
   const CACHE_EXPIRATION = 1000 * 60 * 60; // 1 hour
   const CACHE_KEY_NONPROFITS = "cache_nonprofits";
@@ -377,7 +379,10 @@ const SearchComponent = ({
 
   const handlePress = (client) => {
     setSearchInput("");
-    navigation.navigate("Profile Page", { client: clients[0] });
+    navigation.navigate("User Profile", {
+      profile,
+      organization
+    });
   };
 
   const combinedResults = [
@@ -412,14 +417,9 @@ const SearchComponent = ({
             <TouchableOpacity
               activeOpacity={1}
               onPress={() => handlePress(clients[0])}
+              style={{ marginLeft: 10 }}
             >
-              <Image
-                source={require("../assets/images/userImage1.jpg")}
-                style={[
-                  globalstyles.profileImage,
-                  { marginLeft: 10, width: 45, height: 45 },
-                ]}
-              />
+              <Icon name="person-circle-outline" size={45} color="#616a6c" />
             </TouchableOpacity>
           )}
         </View>

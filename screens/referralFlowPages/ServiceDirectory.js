@@ -236,7 +236,7 @@ const ServiceDirectory = ({ route, navigation }) => {
         <SearchComponent
           searchInput={searchInput}
           setSearchInput={setSearchInput}
-          showProfileImage={false} // Hide the profile image here
+          showProfileImage={true} // Hide the profile image here
         />
       </View>
       {organization && (

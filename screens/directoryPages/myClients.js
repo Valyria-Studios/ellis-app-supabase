@@ -38,7 +38,7 @@ const MyClients = ({ navigation }) => {
   }, []);
 
   const handleClientPress = (client) => {
-    navigation.navigate("Profile Page", { client }); // Navigate to the ProfilePage with client data
+    navigation.navigate("Client Profile", { client }); // Navigate to the Client Profile with client data
   };
 
   const removeClient = async (engagementClientId) => {

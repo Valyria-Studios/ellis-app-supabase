@@ -81,7 +81,8 @@ App/
 │   │   └── services/     # Service management
 │   │       └── services.js # Add/edit services
 │   ├── profilePages/     # User profile screens
-│   │   └── ProfilePage.js # Client profile view
+│   │   └── ClientProfile.js # Client profile view
+|   |   |__ UserProfile.js # User profile view
 │   ├── referralFlowPages/ # Service referral workflow
 │   │   ├── ConfirmReferral.js # Confirm referral details
 │   │   ├── EnrollmentForm.js # Complete service enrollment form
@@ -139,7 +140,8 @@ Ellis uses Supabase for authentication with email-based OTP (One-Time Password) 
 - Track client demographics and needs (`App/screens/plusNavigatorButton/client/ClientInformation.js`)
 - Manage relationships with clients (`App/screens/relationshipsPages/Relationships.js`)
 - Document client interactions through notes (`App/screens/plusNavigatorButton/notes/CreateNote.js`, `App/screens/plusNavigatorButton/notes/NoteDetails.js`)
-- View client profiles with detailed information (`App/screens/profilePages/ProfilePage.js`)
+- View user profiles with detailed information (`App/screens/profilePages/UserProfile.js`)
+- View client profiles with detailed information (`App/screens/profilePages/ClientProfile.js`)
 - Filter and search clients (`App/shared/SearchHeader.js`)
 
 ### Service Directory

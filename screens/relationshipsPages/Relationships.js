@@ -136,7 +136,7 @@ const RelationshipPage = () => {
         {filteredClients.map((client) => (
           <TouchableOpacity
             key={client.id}
-            onPress={() => navigation.navigate("Profile Page", { client })}
+            onPress={() => navigation.navigate("Client Profile", { client })}
             activeOpacity={1}
           >
             <Card key={client.id}>
