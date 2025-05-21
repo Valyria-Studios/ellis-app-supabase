@@ -45,11 +45,13 @@ const Onboarding = ({ navigation }) => {
           <TouchableOpacity
             style={[globalstyles.buttonContainer]}
             activeOpacity={0.6}
+            onPress={() => navigation.push("EnterInviteCode")}
           >
             <View>
               <Text style={globalstyles.buttonText}>Enter an invite code</Text>
             </View>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.loginContainer}
             onPress={() => navigation.push("Login")}

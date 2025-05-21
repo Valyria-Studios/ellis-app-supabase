@@ -3,6 +3,7 @@
     "name": "Ellis",
     "slug": "ellis-app",
     "version": "0.0.14",
+    "scheme": "ellisapp",
     "orientation": "portrait",
     "icon": "./assets/ellis-test-icon.png",
     "userInterfaceStyle": "light",

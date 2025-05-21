@@ -35,4 +35,5 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-test-for-writing-to-sheet-dc20eeb8c2e8.json
+# Ignore VS Code settings folder
+.vscode

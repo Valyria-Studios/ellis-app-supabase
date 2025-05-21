@@ -46,12 +46,12 @@ import OnBoardingNavigator from "./OnboardingNavigator";
 import { useUser } from "../context/userContext";
 import AccountCreation from "../screens/onboarding/AccountCreation";
 import UserProfile from "../screens/profilePages/UserProfile";
+import InviteAccountCreation from "../screens/onboarding/InviteAccountCreation";
 
 const RootStack = createStackNavigator();
 
 const RootNavigator = () => {
-  const { user, profile } = useUser(); // Get user and profile from context
-
+  const { user, profile, wasInvited } = useUser(); // Get user and profile from context
   return (
     <RootStack.Navigator>
       {user ? (
@@ -710,6 +710,12 @@ const RootNavigator = () => {
               })}
             />
           </>
+        ) : wasInvited ? (
+          <RootStack.Screen
+            name="InviteAccountCreation"
+            component={InviteAccountCreation}
+            options={{ headerShown: false }}
+          />
         ) : (
           <RootStack.Screen
             name="AccountCreation"

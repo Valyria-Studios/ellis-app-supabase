@@ -11,6 +11,8 @@ export const UserProvider = ({ children }) => {
   const SESSION_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
   const [profile, setProfile] = useState(null);
   const [organization, setOrganization] = useState(null);
+  const [wasInvited, setWasInvited] = useState(false);
+  const [orgId, setOrgId] = useState(null);
 
   // Function to log out the user
   const logoutUser = async () => {
@@ -93,10 +95,12 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const checkUser = async () => {
       const { data, error } = await authSupabase.auth.getUser();
+      console.log(data.user.user_metadata?.wasInvited);
       if (error) {
         console.log("Error fetching user:", error);
       } else if (data?.user) {
         setUser(data.user);
+        setWasInvited(data.user.user_metadata?.wasInvited || false);
         fetchUserProfile(data.user.id); // ✅ Fetch profile immediately
         setLoginTimestamp(Date.now());
         startSessionTimeout();
@@ -110,10 +114,36 @@ export const UserProvider = ({ children }) => {
       (_event, session) => {
         if (session?.user) {
           setUser(session.user);
+          setWasInvited(session.user.user_metadata?.wasInvited || false); // ✅ add this too
           fetchUserProfile(session.user.id); // ✅ Fetch updated profile on auth change
           setLoginTimestamp(Date.now());
           startSessionTimeout();
         } else {
+          setUser(null);
+          setProfile(null);
+          setLoginTimestamp(null);
+        }
+      }
+    );
+
+    return () => subscription?.subscription?.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const { data: subscription } = authSupabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "SIGNED_IN" && session?.user) {
+          // ✅ Update metadata when session is actually ready
+          await authSupabase.auth.updateUser({
+            data: { wasInvited: true },
+          });
+
+          setWasInvited(true);
+          setUser(session.user);
+          fetchUserProfile(session.user.id);
+          setLoginTimestamp(Date.now());
+          startSessionTimeout();
+        } else if (event === "SIGNED_OUT") {
           setUser(null);
           setProfile(null);
           setLoginTimestamp(null);
@@ -132,6 +162,10 @@ export const UserProvider = ({ children }) => {
         organization, // full org object
         fetchUserProfile,
         updateOrganization, // helper to update org
+        wasInvited,
+        setWasInvited,
+        orgId,
+        setOrgId,
       }}
     >
       {children}
