@@ -143,23 +143,44 @@ const RootNavigator = () => {
             <RootStack.Screen
               name="Amenity Page"
               component={AmenityPage}
-              options={({ navigation, route }) => ({
-                headerTitle: "",
-                headerLeft: () => <CustomBackButton color="#094852" />,
-                headerTitleAlign: "left",
-                headerTitleStyle: {
-                  fontFamily: "gabarito-semibold",
-                  fontSize: 24,
-                  color: "#094852",
-                },
-                headerStyle: {
-                  backgroundColor: "#F3F8F9",
-                  shadowColor: "transparent",
-                  elevation: 0,
-                },
-                headerTransparent: true,
-              })}
+              options={({ navigation, route }) => {
+                const amenity = route.params?.amenity;
+                const isUserOrg = profile?.organization === amenity?.id;
+
+                return {
+                  headerTitle: "",
+                  headerLeft: () => <CustomBackButton color="#094852" />,
+                  headerTitleAlign: "left",
+                  headerTitleStyle: {
+                    fontFamily: "gabarito-semibold",
+                    fontSize: 24,
+                    color: "#094852",
+                  },
+                  headerStyle: {
+                    backgroundColor: "#F3F8F9",
+                    shadowColor: "transparent",
+                    elevation: 0,
+                  },
+                  headerTransparent: true,
+                  headerRight: () =>
+                    isUserOrg ? (
+                      <TouchableOpacity
+                        onPress={
+                          () => navigation.setParams({ isEditMode: true }) // or trigger a state update in `AmenityPage`
+                        }
+                        style={{ paddingRight: 15 }}
+                      >
+                        <Ionicons
+                          name="create-outline"
+                          size={24}
+                          color="#094852"
+                        />
+                      </TouchableOpacity>
+                    ) : null,
+                };
+              }}
             />
+
             <RootStack.Screen
               name="User Profile"
               component={UserProfile}

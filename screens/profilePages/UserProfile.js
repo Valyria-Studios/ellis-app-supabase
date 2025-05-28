@@ -1,17 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import globalstyles from "../../shared/globalStyles";
-import { useUser } from "../../context/userContext";
 import { authSupabase } from "../../api/supabaseClient";
-import { v4 as uuidv4 } from "uuid"; // Make sure this is installed
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useUser } from "../../context/userContext";
 
 const UserProfile = () => {
   const route = useRoute();
-  const { profile, organization } = route.params;
-  const { updateOrganization } = useUser();
   const [inviteCode, setInviteCode] = useState("");
+  const navigation = useNavigation();
 
   const generateSimpleCode = (length = 8) => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -21,6 +20,15 @@ const UserProfile = () => {
     }
     return result;
   };
+  const { fetchOrganization, profile, organization } = useUser();
+
+  useFocusEffect(
+    useCallback(() => {
+      if (profile?.organization) {
+        fetchOrganization(profile.organization);
+      }
+    }, [profile?.organization])
+  );
 
   const generateInviteCode = async () => {
     const code = generateSimpleCode(); // returns 8-char random code
@@ -70,7 +78,33 @@ const UserProfile = () => {
       <Text style={styles.info}>{profile.name || "N/A"}</Text>
 
       <Text style={styles.label}>Organization:</Text>
-      <Text style={styles.info}>{organization.name || "N/A"}</Text>
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("Amenity Page", {
+            amenity: {
+              id: organization.id,
+              attributes: {
+                Name: organization.name,
+                "Street address": organization.address,
+                "Phone number": organization.phone_number,
+                Description: organization.description,
+                Cover: organization.cover,
+                "Web URL": organization.web_url,
+              },
+              services: organization.services || [],
+            },
+          })
+        }
+      >
+        <Text
+          style={[
+            styles.info,
+            { color: "#10798B", textDecorationLine: "underline" },
+          ]}
+        >
+          {organization.name || "N/A"}
+        </Text>
+      </TouchableOpacity>
 
       <Text style={styles.label}>Email:</Text>
       <Text style={styles.info}>{profile.email || "N/A"}</Text>

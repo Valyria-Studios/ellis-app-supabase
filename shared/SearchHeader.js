@@ -30,7 +30,6 @@ const SearchComponent = ({
   const [filteredSubservices, setFilteredSubservices] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { profile, organization, updateOrganization } = useUser();
 
   const CACHE_EXPIRATION = 1000 * 60 * 60; // 1 hour
   const CACHE_KEY_NONPROFITS = "cache_nonprofits";
@@ -379,10 +378,7 @@ const SearchComponent = ({
 
   const handlePress = (client) => {
     setSearchInput("");
-    navigation.navigate("User Profile", {
-      profile,
-      organization
-    });
+    navigation.navigate("User Profile");
   };
 
   const combinedResults = [

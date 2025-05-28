@@ -19,6 +19,10 @@ import {
   FontAwesome6,
 } from "@expo/vector-icons";
 import globalstyles from "../../shared/globalStyles";
+import defaultImage from "../../assets/images/location4.jpg";
+import { Alert } from "react-native";
+import { authSupabase } from "../../api/supabaseClient"; // Ensure this path is correct
+import { useUser } from "../../context/userContext";
 
 function AmenityPage({ route, navigation }) {
   const { amenity } = route.params;
@@ -36,9 +40,9 @@ function AmenityPage({ route, navigation }) {
         ? amenity.attributes.Description.join(" ") // Combine array elements into a single string, if applicable
         : "No description available",
   });
+  const { updateOrganization } = useUser();
 
   useEffect(() => {
-    // Update state if the route's edit mode changes
     if (route.params?.isEditMode !== undefined) {
       setIsEditMode(route.params.isEditMode);
     }
@@ -63,10 +67,12 @@ function AmenityPage({ route, navigation }) {
       {/* ImageBackground */}
       <ImageBackground
         source={{
-          uri: amenity?.attributes?.Cover.replace(
-            "ipfs://",
-            "https://ipfs.io/ipfs/"
-          ),
+          uri: amenity?.attributes?.Cover
+            ? amenity.attributes.Cover.replace(
+                "ipfs://",
+                "https://ipfs.io/ipfs/"
+              )
+            : defaultImage, // Replace with your default image URL
         }}
         style={styles.container}
         onLoad={() => setImageLoaded(true)}
@@ -236,6 +242,104 @@ function AmenityPage({ route, navigation }) {
                   >
                     {editedData.description || "No description available"}
                   </Text>
+                )}
+                {isEditMode && (
+                  <TouchableOpacity
+                    onPress={async () => {
+                      try {
+                        const { error } = await authSupabase
+                          .from("nonprofits")
+                          .update({
+                            name: editedData.name,
+                            address: editedData.address,
+                            phone_number: editedData.phone,
+                            description: editedData.description,
+                          })
+                          .eq("id", amenity.id);
+
+                        if (error) {
+                          console.error("Error updating nonprofit:", error);
+                          Alert.alert(
+                            "Error",
+                            "Failed to update organization."
+                          );
+                          return;
+                        }
+
+                        // ✅ Re-fetch updated data
+                        const { data: updatedAmenity, error: fetchError } =
+                          await authSupabase
+                            .from("nonprofits")
+                            .select("*")
+                            .eq("id", amenity.id)
+                            .single();
+
+                        if (fetchError || !updatedAmenity) {
+                          console.error(
+                            "Failed to fetch updated org:",
+                            fetchError
+                          );
+                          Alert.alert(
+                            "Warning",
+                            "Saved, but failed to refresh updated data."
+                          );
+                          navigation.setParams({ isEditMode: false });
+                          return;
+                        }
+
+                        // ✅ Replace original amenity data in route
+                        navigation.setParams({
+                          isEditMode: false,
+                          amenity: {
+                            ...amenity,
+                            attributes: {
+                              ...amenity.attributes,
+                              Name: updatedAmenity.name,
+                              "Street address": updatedAmenity.address,
+                              "Phone number": updatedAmenity.phone_number,
+                              Description: updatedAmenity.description,
+                            },
+                          },
+                        });
+
+                        setEditedData({
+                          name: updatedAmenity.name,
+                          address: updatedAmenity.address,
+                          phone: updatedAmenity.phone_number,
+                          description: updatedAmenity.description,
+                        });
+
+                        await updateOrganization({
+                          name: editedData.name,
+                          address: editedData.address,
+                          phone_number: editedData.phone,
+                          description: editedData.description,
+                        });
+
+                        Alert.alert("Success", "Organization updated.");
+                      } catch (err) {
+                        console.error("Unexpected error:", err);
+                        Alert.alert("Error", "An unexpected error occurred.");
+                      }
+                    }}
+                    style={{
+                      backgroundColor: "#10798B",
+                      padding: 12,
+                      borderRadius: 10,
+                      marginTop: 10,
+                      alignSelf: "flex-start",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "white",
+                        fontSize: 16,
+                        fontFamily: "gabarito-bold",
+                      }}
+                    >
+                      Save Changes
+                    </Text>
+                  </TouchableOpacity>
                 )}
               </View>
 

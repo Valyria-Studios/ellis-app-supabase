@@ -161,6 +161,7 @@ export const UserProvider = ({ children }) => {
         profile,
         organization, // full org object
         fetchUserProfile,
+        fetchOrganization,
         updateOrganization, // helper to update org
         wasInvited,
         setWasInvited,
