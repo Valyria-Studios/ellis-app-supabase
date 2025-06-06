@@ -19,7 +19,6 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useIsFocused } from "@react-navigation/native";
 import SearchComponent from "../../shared/SearchHeader";
-import { useUser } from "../../context/userContext";
 import { authSupabase } from "../../api/supabaseClient";
 
 const ServiceDirectory = ({ route, navigation }) => {

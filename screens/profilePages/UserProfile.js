@@ -67,7 +67,7 @@ const UserProfile = () => {
   if (!profile) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>No user information available.</Text>
+        <Text style={styles.errorText}>No user information available. Account creation will be coming soon to Ellis!</Text>
       </View>
     );
   }

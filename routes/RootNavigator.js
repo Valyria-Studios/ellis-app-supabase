@@ -52,10 +52,11 @@ const RootStack = createStackNavigator();
 
 const RootNavigator = () => {
   const { user, profile, wasInvited } = useUser(); // Get user and profile from context
+  const alwaysBypassOnboarding = true;
   return (
     <RootStack.Navigator>
-      {user ? (
-        profile && profile.name ? ( // 🔹 Ensure profile has a name before allowing access
+      {user || alwaysBypassOnboarding ? (
+        (profile && profile.name) || alwaysBypassOnboarding ? ( // 🔹 Ensure profile has a name before allowing access
           <>
             <RootStack.Screen
               name="Service Directory"
