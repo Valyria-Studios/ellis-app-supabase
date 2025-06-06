@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ellis",
     "slug": "ellis-app",
-    "version": "0.0.14",
+    "version": "0.0.15",
     "scheme": "ellisapp",
     "orientation": "portrait",
     "icon": "./assets/ellis-test-icon.png",
@@ -22,7 +22,7 @@
     },
     "android": {
       "package": "com.mpatel31.App",
-      "versionCode": 10,
+      "versionCode": 11,
       "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/ellis-test-icon.png",
