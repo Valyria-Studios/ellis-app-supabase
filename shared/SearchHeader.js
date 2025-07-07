@@ -44,43 +44,44 @@ const SearchComponent = ({
   }, []);
 
   useEffect(() => {
-    const loadServiceAndNonProfitsData = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
-        const { data: nonProfitsData, error } = await authSupabase
-          .from("nonprofits")
-          .select("*");
 
-        if (error) throw error;
+        // Fetch nonprofits
+        const { data: nonProfitsData, error: nonprofitsError } =
+          await authSupabase.from("nonprofits").select("*");
+
+        if (nonprofitsError) throw nonprofitsError;
 
         setOrganizations(nonProfitsData);
         setFilteredOrganizations(nonProfitsData);
+
+        // Fetch services with subservices from Supabase
+        const { data: servicesData, error: servicesError } = await authSupabase
+          .from("services")
+          .select("id, name, subservices");
+
+        if (servicesError) throw servicesError;
+
+        const allSubservices = servicesData.flatMap(
+          (service) =>
+            service.subservices?.map((sub) => ({
+              ...sub,
+              parentServiceId: service.id,
+              parentServiceName: service.name,
+            })) || []
+        );
+
+        setSubservices(allSubservices);
       } catch (error) {
-        console.error("Failed to load NonProfits", error);
+        console.error("❌ Error loading search data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadServiceAndNonProfitsData();
-
-    // Fetch services and extract subservices
-    const fetchServices = async () => {
-      try {
-        const response = await fetch(
-          "https://ellis-test-data.com:8000/Services"
-        );
-        const servicesData = await response.json();
-        const allSubservices = servicesData.flatMap(
-          (service) => service.Subservices
-        );
-        setSubservices(allSubservices);
-      } catch (error) {
-        console.error("Error fetching services:", error);
-      }
-    };
-
-    fetchServices();
+    loadData();
   }, []);
 
   const fetchWithCache = async (cacheKey, url) => {
@@ -239,7 +240,8 @@ const SearchComponent = ({
 
   const handleSearchPress = async (organization) => {
     const searchTerm = searchInput;
-    const organizationName = organization.attributes?.Name || organization.name;
+    const organizationName =
+      organization.name || organization.attributes?.Name || "Unknown Org";
     const orgId = organization.id || `placeholder-${Date.now()}`;
     const newTimestamp = new Date().toISOString();
 
@@ -311,69 +313,28 @@ const SearchComponent = ({
   };
 
   const handleSubservicePress = async (subservice) => {
-    const searchTerm = searchInput;
     const subserviceName = subservice.name;
-    const subserviceId = subservice.valueId || `placeholder-${Date.now()}`;
-    const newTimestamp = new Date().toISOString();
+    const subserviceId = subservice.valueId || subservice.id;
 
-    try {
-      const { data: existingRecords, error: fetchError } = await dataSupabase
-        .from("search_data")
-        .select("id, iterations, time")
-        .eq("id", subserviceId)
-        .single();
+    // Filter nonprofits that offer this subservice
+    const matchingNonprofits = organizations.filter((org) => {
+      const orgServices = Array.isArray(org.services)
+        ? org.services
+        : typeof org.services === "string"
+        ? JSON.parse(org.services)
+        : [];
 
-      if (fetchError && fetchError.code !== "PGRST116") {
-        console.error("❌ Error checking for existing subservice:", fetchError);
-        return;
-      }
+      return orgServices.some((s) => s.id === subserviceId);
+    });
 
-      if (existingRecords) {
-        const updatedIterations = existingRecords.iterations + 1;
-        const updatedTime = [...existingRecords.time, newTimestamp];
-
-        const { error: updateError } = await dataSupabase
-          .from("search_data")
-          .update({ iterations: updatedIterations, time: updatedTime })
-          .eq("id", subserviceId);
-
-        if (updateError) {
-          console.error("❌ Error updating subservice:", updateError);
-        } else {
-          console.log("✅ Subservice search updated in Supabase!");
-        }
-      } else {
-        const newEntry = {
-          search: searchTerm,
-          Subservice: subserviceName,
-          Organization: null,
-          iterations: 1,
-          id: subserviceId,
-          time: [newTimestamp],
-        };
-
-        const { error: insertError } = await dataSupabase
-          .from("search_data")
-          .insert([newEntry]);
-
-        if (insertError) {
-          console.error(
-            "❌ Error inserting new subservice search:",
-            insertError
-          );
-        } else {
-          console.log("✅ New subservice search inserted into Supabase!");
-        }
-      }
-    } catch (error) {
-      console.error("❌ Error processing subservice search:", error);
-    }
-
-    setSearchInput("");
+    // Navigate with the matching nonprofits
     navigation.navigate("Referral Location", {
       option: subserviceName,
-      providedServicesId: subservice.valueId,
+      providedServicesId: subserviceId,
+      nonprofits: matchingNonprofits, // 🟢 Pass the filtered list
     });
+
+    setSearchInput(""); // Clear search
   };
 
   const handlePress = (client) => {

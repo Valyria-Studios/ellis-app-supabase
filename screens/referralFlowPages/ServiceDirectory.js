@@ -123,10 +123,10 @@ const ServiceDirectory = ({ route, navigation }) => {
         setLoading(true);
 
         // Fetch services (you can keep this or replace similarly if also stored in Supabase)
-        const servicesData = await fetchWithCache(
-          CACHE_KEY_SERVICES,
-          "https://ellis-test-data.com:8000/Services"
-        );
+        const { data: servicesData, error: servicesError } = await authSupabase
+          .from("services")
+          .select("*");
+        if (servicesError) throw servicesError;
 
         // 👇 Replace the NonProfits fetch with Supabase directly
         const { data: nonProfitsData, error } = await authSupabase
@@ -138,28 +138,24 @@ const ServiceDirectory = ({ route, navigation }) => {
         }
 
         // Transform services data (keep existing logic)
-        const transformedCategories = servicesData.map((service) => ({
-          id: service.id,
-          name: service.name,
-          Subservices: service.Subservices.map((subservice) => ({
-            id: subservice.id,
-            name: subservice.name,
-            valueId: subservice.valueId,
-            spaceId: subservice.spaceId,
+        const transformedCategories = servicesData.map((category) => ({
+          id: category.id,
+          name: category.name,
+          Subservices: category.subservices.map((sub) => ({
+            id: sub.id,
+            name: sub.name,
+            valueId: sub.id, // used for matching
           })),
         }));
 
         // Filter categories based on nonprofits from Supabase
-        const filteredCategories = transformedCategories.filter((category) => {
-          const hasNonProfits = category.Subservices.some((subservice) =>
-            nonProfitsData.some((nonProfit) =>
-              nonProfit.services?.some(
-                (service) => service.id === subservice.valueId
-              )
+        const filteredCategories = transformedCategories.filter((category) =>
+          category.Subservices.some((sub) =>
+            nonProfitsData.some((np) =>
+              (np.services || []).some((svc) => svc.id === sub.id)
             )
-          );
-          return hasNonProfits;
-        });
+          )
+        );
 
         setServiceCategories(filteredCategories);
         setNonProfits(nonProfitsData);
@@ -174,14 +170,11 @@ const ServiceDirectory = ({ route, navigation }) => {
   }, []);
 
   const handleServicePress = (category) => {
-    const filteredNonProfits = nonProfits.filter((nonProfit) =>
-      nonProfit.services?.some((service) =>
-        category.Subservices.some(
-          (subservice) => subservice.valueId === service.id
-        )
+    const filteredNonProfits = nonProfits.filter((np) =>
+      (np.services || []).some((svc) =>
+        category.Subservices.some((sub) => sub.id === svc.id)
       )
     );
-
     navigation.navigate("Service Details", {
       category,
       client,

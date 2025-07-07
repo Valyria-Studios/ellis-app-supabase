@@ -43,21 +43,25 @@ const ServiceDetails = ({ route, navigation }) => {
     }
   };
 
+  const mainServiceHasNonprofits = filteredNonProfits.some((nonProfit) =>
+    nonProfit.services?.some((service) => service.id === category.id)
+  );
+
   const handleMainServicePress = () => {
     incrementServiceFrequency(
-      category.name, // Main category name
-      category.name, // Option name (same as the category name for the main service)
+      category.name,
+      category.name,
       category.icon,
       category.library,
-      category.id // Pass the main service ID
+      category.id
     );
 
     navigation.navigate("Referral Location", {
       option: category.name,
       categoryName: category.name,
       client,
-      providedServicesId: category.id, // Pass the main service ID
-      filteredNonProfits, // Pass all filtered NonProfits
+      providedServicesId: category.id,
+      filteredNonProfits,
     });
   };
 
@@ -72,9 +76,7 @@ const ServiceDetails = ({ route, navigation }) => {
 
     // Update the filter to use providedServiceswithId
     const filteredBySubservice = filteredNonProfits.filter((nonProfit) =>
-      nonProfit.providedServiceswithId.some(
-        (service) => service.id === subservice.valueId
-      )
+      nonProfit.services?.some((service) => service.id === subservice.valueId)
     );
 
     navigation.navigate("Referral Location", {
@@ -91,28 +93,31 @@ const ServiceDetails = ({ route, navigation }) => {
       style={[globalstyles.container, { paddingTop: 15, paddingHorizontal: 5 }]}
     >
       {/* Option for the main service */}
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={styles.container}
-        onPress={handleMainServicePress}
-      >
-        <View
-          style={[
-            globalstyles.optionsContainer,
-            { flexDirection: "row", justifyContent: "space-between" },
-          ]}
+      {/* ✅ Only render main category card if it has nonprofit matches */}
+      {mainServiceHasNonprofits && (
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.container}
+          onPress={handleMainServicePress}
         >
-          <View style={{ flexDirection: "row" }}>
-            {renderIcon(category.icon, category.library, styles.icon, 20)}
-            <Text style={globalstyles.optionsText}>{category.name}</Text>
+          <View
+            style={[
+              globalstyles.optionsContainer,
+              { flexDirection: "row", justifyContent: "space-between" },
+            ]}
+          >
+            <View style={{ flexDirection: "row" }}>
+              {renderIcon(category.icon, category.library, styles.icon, 20)}
+              <Text style={globalstyles.optionsText}>{category.name}</Text>
+            </View>
+            <MaterialIcons
+              name="keyboard-arrow-right"
+              size={28}
+              style={{ color: "#094852" }}
+            />
           </View>
-          <MaterialIcons
-            name="keyboard-arrow-right"
-            size={28}
-            style={{ color: "#094852" }}
-          />
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      )}
 
       {category.Subservices &&
         category.Subservices.filter((subservice) =>
