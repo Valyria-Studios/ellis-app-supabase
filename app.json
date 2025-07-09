@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ellis",
     "slug": "ellis-app",
-    "version": "0.0.16",
+    "version": "0.0.1",
     "scheme": "ellisapp",
     "orientation": "portrait",
     "icon": "./assets/ellis-test-icon.png",
@@ -18,14 +18,14 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mpatel31.App",
+      "bundleIdentifier": "com.ellis-test.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.mpatel31.App",
-      "versionCode": 12,
+      "package": "com.ellis-test.App",
+      "versionCode": 1,
       "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/ellis-test-icon.png",
