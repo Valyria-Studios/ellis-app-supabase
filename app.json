@@ -24,7 +24,7 @@
       }
     },
     "android": {
-      "package": "com.ellis-test.App",
+      "package": "com.ellis-test.app",
       "versionCode": 2,
       "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"],
       "adaptiveIcon": {
