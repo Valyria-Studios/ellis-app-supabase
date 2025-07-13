@@ -4,7 +4,7 @@ export default ({ config }) => ({
   ...config,
   name: "Ellis",
   slug: "ellis-app",
-  version: "0.0.2",
+  version: "0.0.3",
   scheme: "ellisapp",
   orientation: "portrait",
   icon: "./assets/ellis-test-icon.png",
@@ -24,7 +24,7 @@ export default ({ config }) => ({
   },
   android: {
     package: "com.ellis-test.app",
-    versionCode: 2,
+    versionCode: 3,
     permissions: ["INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"],
     adaptiveIcon: {
       foregroundImage: "./assets/ellis-test-icon.png",

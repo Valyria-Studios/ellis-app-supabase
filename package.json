@@ -13,8 +13,8 @@
     "@expo/metro-runtime": "~4.0.1",
     "@expo/vector-icons": "~14.0.4",
     "@react-native-async-storage/async-storage": "1.23.1",
-    "@react-native-community/datetimepicker": "8.2.0",
     "@react-native-community/cli": "latest",
+    "@react-native-community/datetimepicker": "8.2.0",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-picker/picker": "2.9.0",
     "@react-navigation/bottom-tabs": "^6.5.9",
@@ -62,7 +62,8 @@
     "react-native-web": "~0.19.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.0"
+    "@babel/core": "^7.24.0",
+    "expo-module-scripts": "^4.1.9"
   },
   "private": true,
   "description": "The is version with supabase not the version with geo!",
