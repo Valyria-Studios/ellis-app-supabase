@@ -12,9 +12,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "experimental": {
-      "exportEmbed": true
-    },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
