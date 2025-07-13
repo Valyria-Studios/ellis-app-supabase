@@ -23,7 +23,7 @@ export default ({ config }) => ({
     },
   },
   android: {
-    package: "com.ellis-test.app",
+    package: "com.valyria.ellis",
     versionCode: 4,
     permissions: ["INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"],
     adaptiveIcon: {
@@ -44,9 +44,7 @@ export default ({ config }) => ({
     dataSupabaseAnonKey: process.env.DATA_SUPABASE_ANON_KEY,
   },
   owner: "valyria",
-  runtimeVersion: {
-    policy: "0.0.4",
-  },
+  runtimeVersion: "0.0.4",
   updates: {
     enabled: false, // ✅ disabled for production, so it avoids OTA issues
   },
