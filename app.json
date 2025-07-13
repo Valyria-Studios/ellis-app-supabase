@@ -2,7 +2,7 @@
   "expo": {
     "name": "Ellis",
     "slug": "ellis-app",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "scheme": "ellisapp",
     "orientation": "portrait",
     "icon": "./assets/ellis-test-icon.png",
@@ -25,7 +25,7 @@
     },
     "android": {
       "package": "com.ellis-test.App",
-      "versionCode": 1,
+      "versionCode": 2,
       "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/ellis-test-icon.png",
@@ -45,7 +45,7 @@
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/2d4a8ef2-a0bb-4fe0-bfe2-894723f3cbfc"
+      "enabled": false
     },
     "plugins": ["expo-font"]
   }
