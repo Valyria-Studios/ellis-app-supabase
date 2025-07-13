@@ -4,7 +4,7 @@ export default ({ config }) => ({
   ...config,
   name: "Ellis",
   slug: "ellis-app",
-  version: "0.0.3",
+  version: "0.0.4",
   scheme: "ellisapp",
   orientation: "portrait",
   icon: "./assets/ellis-test-icon.png",
@@ -24,7 +24,7 @@ export default ({ config }) => ({
   },
   android: {
     package: "com.ellis-test.app",
-    versionCode: 3,
+    versionCode: 4,
     permissions: ["INTERNET", "ACCESS_NETWORK_STATE", "ACCESS_WIFI_STATE"],
     adaptiveIcon: {
       foregroundImage: "./assets/ellis-test-icon.png",
@@ -45,7 +45,7 @@ export default ({ config }) => ({
   },
   owner: "valyria",
   runtimeVersion: {
-    policy: "appVersion",
+    policy: "0.0.4",
   },
   updates: {
     enabled: false, // ✅ disabled for production, so it avoids OTA issues
